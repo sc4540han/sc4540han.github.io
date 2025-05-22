@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>클릭 게임</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh; /* 화면 전체 높이 */
+            margin: 0;
+            background-color: #f0f0f0;
+            font-family: 'Arial', sans-serif;
+            flex-direction: column; /* 세로 정렬 */
+            gap: 20px; /* 요소들 간 간격 */
+        }
+
+        #game-container {
+            text-align: center;
+            background-color: #fff;
+            padding: 30px 50px;
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        #score {
+            font-size: 2.5em;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        #timer {
+            font-size: 1.5em;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        #clickButton {
+            background-color: #4CAF50; /* 초록색 */
+            color: white;
+            padding: 20px 40px;
+            border: none;
+            border-radius: 10px;
+            font-size: 2em;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            box-shadow: 0 4px #388E3C; /* 어두운 초록색 그림자 */
+        }
+
+        #clickButton:hover {
+            background-color: #45a049;
+        }
+
+        #clickButton:active {
+            background-color: #3e8e41;
+            box-shadow: 0 2px #388E3C;
+            transform: translateY(2px);
+        }
+
+        #start-button-container {
+            margin-top: 20px;
+        }
+
+        #startButton {
+            background-color: #008CBA; /* 파란색 */
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.5em;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            box-shadow: 0 4px #007bb5;
+        }
+
+        #startButton:hover {
+            background-color: #007bb5;
+        }
+
+        #startButton:active {
+            background-color: #006699;
+            box-shadow: 0 2px #007bb5;
+            transform: translateY(2px);
+        }
+
+        #result-screen {
+            display: none; /* 초기에는 숨김 */
+            text-align: center;
+            background-color: #fff;
+            padding: 30px 50px;
+            border-radius: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        #final-score {
+            font-size: 3em;
+            color: #d32f2f; /* 빨간색 */
+            margin-bottom: 20px;
+        }
+
+        #restartButton {
+            background-color: #f44336; /* 빨간색 */
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.5em;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            box-shadow: 0 4px #d32f2f;
+        }
+
+        #restartButton:hover {
+            background-color: #d32f2f;
+        }
+
+        #restartButton:active {
+            background-color: #c62828;
+            box-shadow: 0 2px #d32f2f;
+            transform: translateY(2px);
+        }
+
+        /* 게임 중에는 시작 버튼 숨기기 */
+        body.game-active #start-button-container {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="game-container">
+        <div id="score">점수: 0</div>
+        <div id="timer">남은 시간: 10초</div>
+        <button id="clickButton" disabled>클릭!</button>
+    </div>
+
+    <div id="start-button-container">
+        <button id="startButton">게임 시작</button>
+    </div>
+
+    <div id="result-screen">
+        <h2>게임 종료!</h2>
+        <div id="final-score">당신의 점수: 0</div>
+        <button id="restartButton">다시 시작</button>
+    </div>
+
+    <script>
+        const scoreDisplay = document.getElementById('score');
+        const timerDisplay = document.getElementById('timer');
+        const clickButton = document.getElementById('clickButton');
+        const startButton = document.getElementById('startButton');
+        const restartButton = document.getElementById('restartButton');
+        const gameContainer = document.getElementById('game-container');
+        const startButtonContainer = document.getElementById('start-button-container');
+        const resultScreen = document.getElementById('result-screen');
+        const finalScoreDisplay = document.getElementById('final-score');
+        const body = document.body; // body 요소 참조
+
+        let score = 0;
+        let timeLeft = 10;
+        let gameInterval;
+        let isGameActive = false;
+
+        function updateScore() {
+            if (isGameActive) {
+                score++;
+                scoreDisplay.textContent = `점수: ${score}`;
+            }
+        }
+
+        function startGame() {
+            score = 0;
+            timeLeft = 10;
+            isGameActive = true;
+            scoreDisplay.textContent = `점수: ${score}`;
+            timerDisplay.textContent = `남은 시간: ${timeLeft}초`;
+            clickButton.disabled = false; // 버튼 활성화
+            
+            // 게임 화면만 보이고 시작 버튼은 숨김
+            startButtonContainer.style.display = 'none';
+            gameContainer.style.display = 'block';
+            resultScreen.style.display = 'none';
+            body.classList.add('game-active'); // body에 클래스 추가 (CSS 제어용)
+
+            gameInterval = setInterval(() => {
+                timeLeft--;
+                timerDisplay.textContent = `남은 시간: ${timeLeft}초`;
+
+                if (timeLeft <= 0) {
+                    endGame();
+                }
+            }, 1000);
+        }
+
+        function endGame() {
+            clearInterval(gameInterval);
+            isGameActive = false;
+            clickButton.disabled = true; // 버튼 비활성화
+
+            // 결과 화면 표시
+            gameContainer.style.display = 'none';
+            resultScreen.style.display = 'block';
+            finalScoreDisplay.textContent = `당신의 점수: ${score}`;
+            body.classList.remove('game-active'); // body에서 클래스 제거
+        }
+
+        function restartGame() {
+            // 게임 초기 상태로 되돌리고 시작 버튼 다시 표시
+            score = 0;
+            timeLeft = 10;
+            scoreDisplay.textContent = `점수: ${score}`;
+            timerDisplay.textContent = `남은 시간: ${timeLeft}초`;
+            clickButton.disabled = true;
+            
+            resultScreen.style.display = 'none';
+            startButtonContainer.style.display = 'block';
+            gameContainer.style.display = 'block'; // 게임 컨테이너도 다시 보이게
+            body.classList.remove('game-active');
+        }
+
+        clickButton.addEventListener('click', updateScore);
+        startButton.addEventListener('click', startGame);
+        restartButton.addEventListener('click', restartGame);
+
+        // 초기 상태: 게임 시작 버튼만 보이도록
+        gameContainer.style.display = 'block'; // 초기에는 보이지만 버튼은 비활성화
+        resultScreen.style.display = 'none';
+        startButtonContainer.style.display = 'block'; // 시작 버튼은 항상 보이게
+        clickButton.disabled = true; // 초기에는 클릭 버튼 비활성화
+    </script>
+</body>
+</html>
